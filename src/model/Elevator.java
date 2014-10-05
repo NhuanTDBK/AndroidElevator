@@ -3,77 +3,105 @@ package model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Observable;
 import java.util.PriorityQueue;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 /**
  *
  * @author Nhuan Lớp thang máy
  */
-public class Elevator {
+public class Elevator extends Observable{
 
     public static final int MAX_PASSENGER = 10; //số lượng hành khác tối đa trong thang máy
     public static final int UP = 1,   //hướng đi lên
-                            DOWN = 0; //hướng thái đi xuống
+                            DOWN = -1; //hướng đi xuống
     public static final int STOP = 0, //trạng thái dừng hoàn toàn, không làm việc. Sử dụng trong trường hợp đặc biệt
                             IDLE = 1, //trạng thái rảnh rỗi, không làm việc.
-                            MOVE= 2,  //trạng thái đang làm việc. 
+                            ACTIVE= 2,  //trạng thái đang làm việc. 
                             PAUSE = 3;//trạng thái tạm dừng. Dùng cho trường hợp đón, trả khách
     public static final int MAX_FLOOR = 6;//số lượng tầng tối đa
     public static final int WEIGHT = 100;//trọng tải của thang máy( không có hành khách)
-    public static final int WARNING_WEIGHT = 2000;//trọng tải tối đa
+    public static final int WARNING_WEIGHT = 150;//trọng tải tối đa
     public ArrayList<Passenger> passengers;//Số hành khách trong thang
     public RequestQueue request;//Yêu cầu của hành khách
-    private int _id;            //id của thang máy.
+    public Door door;           //Cửa thang máy
+    private int _id;            //id của thang máy. Dùng để phân biệt các thang máy
     private int _direction;     //Hướng đi của thang máy hiện tại
-    private int _floor;      //Tầng 
-    private int _status;
-    private int _weight;
-    private int _numofpassengers;
+    private int _floor;         //Tầng 
+    private int _status;        //trạng thái của thang máy
+    private int _weight;        //trọng lượng thang máy
+    private int _numofpassengers;//Tổng số khách trong 1 lượt đi
     public Elevator(int id) {
         System.out.println("Elevator "+id+" : online");
+        this.door = new Door();
         this._id = id;
         passengers = new ArrayList<>();
         request = new RequestQueue();
         this._status = IDLE;
     }
-
+    
+    /**
+     *  Trả về số hiệu thang máy
+     * @return id
+     */
     public int getID() {
         return _id;
     }
-
-    public String getDirection() {
-        return (_direction==UP)?"len":"xuong";
+    
+    /**
+     *  
+     * @return hướng di chuyển
+     */
+    public int getDirection()
+    {
+        return this._direction;
     }
-
+    /**
+     *
+     * @return trả về số tầng hiện tại
+     */
     public int getFloor() {
         return _floor;
     }
 
+    /**
+     *
+     * @return trả về trạng thái hiện tại của thang máy
+     */
     public int getStatus() {
         return _status;
     }
 
+    /**
+     *
+     * @return trả về tổng trọng lượng: thang máy + hành khách
+     */
     public int getTotalWeight() {
         return TotalWeight();
     }
+    
+    /**
+     *
+     * @return số hàng khách hiện tại
+     */
     public int getNumberOfPassenger(){ return passengers.size();  }
     public void setDirection(int direction) {
         this._direction = direction;
     }
 
+    /**
+     *
+     * @return 
+     */
     public void setStatus(int status) {
         this._status = status;
     }
     public void setFloor(int floor) {this._floor = floor;}
 
     public void move(int floor) {
-        System.out.println("Elevator"+this._id+": Thang may di "+this.getDirection()+" tang "+floor);
-        setStatus(MOVE);
+        System.out.println("Elevator"+this._id+": Thang may di "+convert(this.getDirection())+" tang "+floor);
+        setStatus(Elevator.ACTIVE);
         setFloor(floor);
         //Cài đặt sau
     }
@@ -82,16 +110,19 @@ public class Elevator {
         System.out.println("Elevator" + this._id+": Thang may tam dung");
         setStatus(PAUSE);
     }
-
-    /*
+    public String convert(int direction)
+    {
+        return direction==Elevator.UP?"len":"xuong";
+    }       
+     /*
      Thêm hàng khách, cài đặt lại khi có GUI
      */
     public boolean addPassenger(Passenger p) {
-       if(getStatus()!=MOVE) {setStatus(MOVE);}
-        boolean result = isOverweight();
+       if(getStatus()!=ACTIVE) {setStatus(Elevator.ACTIVE);}
+        boolean result = false;
         int floorToGo = p.getFloor();
         int direction = p.getDirection();
-        System.out.println("Elevator" + this._id+": them hanh khach di "+this.getDirection()+" floor:"+floorToGo);
+        System.out.println("Elevator" + this._id+": them hanh khach di "+ convert(p.getDirection())+ " floor:"+floorToGo);
         if (result == true) {
             return false;
         } else {
@@ -102,33 +133,31 @@ public class Elevator {
                 result = request.addDown(floorToGo);
             }
         }
+        result = result&&isOverweight();
+        if(result==false) System.out.println("Error overloadiing");
         return result;
     }
     /*
         Cài đặt lại khi có GUI
     */
-    public boolean removePassenger()
+    public boolean removePassenger(int floor)
     {
         
-        if(getStatus()!=PAUSE) return false;
-        int floor = getFloor();
+        //if(getStatus()!=STOP) return false;
+        int direction = this._direction;
         int total_exit_passenger = 0;
-        Passenger p ;
-        /*
-           Cho khách đi ra khi số tầng thang máy đang dừng trùng với số tấng khách muốn đến. 
-        */
-        for (Iterator<Passenger> it = passengers.iterator(); it.hasNext();) {
-            p = it.next();
-            //Kiểm tra những ai yêu cầu tới tầng này
-            if(p.getFloor()==floor)
+        for (Passenger p: passengers) {
+                
+            if(this._direction==p.getDirection()&&p.getFloor()==floor)
             {
                 //Mở cửa cho ra
                 System.out.println("Elevator"+this._id+": Hang khach di ra thang may ");
-                System.out.print(" " +p.getFloor());
                 passengers.remove(p);
+                _weight-=p.getWeight();
                 total_exit_passenger +=1;
             }
         }
+        
         return true;
     }
     /*
@@ -146,6 +175,7 @@ public class Elevator {
     }
     /*
      Trả về đúng nếu trọng tải thang máy vượt mức cho phép
+      Hành khách vào sau cùng sẽ đi ra nếu thang máy quá tải
      */
 
     public boolean isOverweight() {

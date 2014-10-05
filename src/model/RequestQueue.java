@@ -30,7 +30,7 @@ public class RequestQueue extends PriorityQueue<Integer>{
     private PriorityQueue<Integer> downQueue;
 
     public RequestQueue() {
-        upQueue = new PriorityQueue<Integer>();
+        upQueue = new PriorityQueue<Integer>(100);
         NumberComparator com = new NumberComparator();
         downQueue = new PriorityQueue<Integer>(100, com);
     }
@@ -50,6 +50,29 @@ public class RequestQueue extends PriorityQueue<Integer>{
     public int getMinUp() {
         int result = upQueue.peek();
         return result;
+    }
+    public int checkRequest()
+    {
+       if(!isUpRequestEmpty()) return Elevator.UP;
+        else 
+            {
+                if(!isDownRequestEmpty()) return Elevator.DOWN;
+            }
+        return 0;
+    }
+    public int getNextFloor(int direction)
+    {
+        if(direction == Elevator.UP) return getMinUp();
+        else if(direction==Elevator.DOWN) return getMaxDown();
+        return 0;
+    }
+    public boolean removeFloor(int direction,int floor)
+    {
+        if(direction==Elevator.UP) 
+            return removeUp(floor);
+        else if(direction==Elevator.DOWN)
+            return removeDown(floor);
+        return true;
     }
     /*
      Thêm tầng yêu cầu vào hàng đợi, kiểm tra để tránh các yêu cầu trùng lặp
@@ -93,5 +116,28 @@ public class RequestQueue extends PriorityQueue<Integer>{
 
     public boolean removeDown(int floor) {
         return downQueue.remove(floor);
+    }
+    @Override
+    public boolean isEmpty()
+    {
+        if(upQueue.isEmpty()&&downQueue.isEmpty())
+        return true;
+        return false;
+    }
+    /*
+    public boolean isEmpty(int direction)
+    {
+        if(direction==Elevator.UP) return isUpRequestEmpty();
+        else return isDownRequestEmpty();
+    } */
+    public boolean isUpRequestEmpty()
+    {
+        if(upQueue.isEmpty()) return true;
+        return false;
+    }
+    public boolean isDownRequestEmpty()
+    {
+        if(downQueue.isEmpty()) return true;
+        return false;
     }
 }
