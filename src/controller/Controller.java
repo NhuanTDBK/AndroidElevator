@@ -19,7 +19,7 @@ public class Controller implements ActionListener {
     private Elevator[] elevators;
     private int [] floors;
     private View view;
-    public static final int MAX_FLOOR = 6;//số lượng tầng tối đa
+    public static final int MAX_FLOOR = 10;//số lượng tầng tối đa
     public Controller(int count_elevator)
     {
         

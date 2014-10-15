@@ -14,10 +14,10 @@ public class Request {
     private int direction;
     private int floor;
     //construct direction and floor
-    public Request(int d, int f)
+    public Request(int floor, int direction)
     {
-        this.direction = d;
-        this.floor = f;
+        this.direction = direction;
+        this.floor = floor;
     }
     public int getDirection()
     {
