@@ -1,8 +1,9 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-
+import controller.Controller;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -28,11 +29,20 @@ public class RequestQueue extends PriorityQueue<Integer>{
 
     private PriorityQueue<Integer> upQueue;
     private PriorityQueue<Integer> downQueue;
-
+    private ArrayList<Integer>floorQueue;
     public RequestQueue() {
         upQueue = new PriorityQueue<Integer>(100);
         NumberComparator com = new NumberComparator();
+        
         downQueue = new PriorityQueue<Integer>(100, com);
+        floorQueue = new ArrayList<Integer>(Controller.MAX_FLOOR);
+    }
+    
+    public boolean checkFloorInRequest(int floor,int direction)
+    {
+        if(direction==Elevator.UP) return upQueue.contains(floor);
+        else return downQueue.contains(floor);
+                
     }
     /*
      Lấy tầng lớn nhất ở hàng đợi đi xuống
@@ -51,14 +61,10 @@ public class RequestQueue extends PriorityQueue<Integer>{
         int result = upQueue.peek();
         return result;
     }
-    public int checkRequest()
+    public boolean checkRequest(int direction)
     {
-       if(!isUpRequestEmpty()) return Elevator.UP;
-        else 
-            {
-                if(!isDownRequestEmpty()) return Elevator.DOWN;
-            }
-        return 0;
+        if(direction==Elevator.UP) return !isUpRequestEmpty();
+        else return !isDownRequestEmpty();
     }
     public int getNextFloor(int direction)
     {
@@ -70,10 +76,18 @@ public class RequestQueue extends PriorityQueue<Integer>{
     {
         if(direction==Elevator.UP) 
             return removeUp(floor);
-        else if(direction==Elevator.DOWN)
-            return removeDown(floor);
-        return true;
+        else return removeDown(floor);
+
     }
+    public void add(Request request)
+    {
+        int direction = request.getDirection();
+        int floor = request.getFloor();
+        int temp = floorQueue.get(floor);
+        temp += direction;
+        floorQueue.set(floor, temp);
+    }
+    
     /*
      Thêm tầng yêu cầu vào hàng đợi, kiểm tra để tránh các yêu cầu trùng lặp
      */

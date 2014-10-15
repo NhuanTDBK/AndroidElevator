@@ -20,7 +20,7 @@ public class Elevator extends Observable{
                             IDLE = 1, //trạng thái rảnh rỗi, không làm việc.
                             ACTIVE= 2,  //trạng thái đang làm việc. 
                             PAUSE = 3;//trạng thái tạm dừng. Dùng cho trường hợp đón, trả khách
-    public static final int MAX_FLOOR = 6;//số lượng tầng tối đa
+    
     public static final int WEIGHT = 100;//trọng tải của thang máy( không có hành khách)
     public static final int WARNING_WEIGHT = 150;//trọng tải tối đa
     public ArrayList<Passenger> passengers;//Số hành khách trong thang
@@ -113,12 +113,30 @@ public class Elevator extends Observable{
     public String convert(int direction)
     {
         return direction==Elevator.UP?"len":"xuong";
-    }       
+    }
+    public boolean addRequest(Request request)
+    {
+        if(getStatus()!=ACTIVE) {
+            setStatus(Elevator.ACTIVE);
+        }
+        boolean result = false;
+        int floorToGo = request.getFloor();
+        int direction = request.getDirection();
+        if(direction==Elevator.UP)
+        {
+            result = this.request.addUp(floorToGo);
+        }
+        else if(direction==Elevator.DOWN)
+        {
+            result = this.request.addDown(floorToGo);
+        }
+        return result;
+    }
      /*
      Thêm hàng khách, cài đặt lại khi có GUI
      */
     public boolean addPassenger(Passenger p) {
-       if(getStatus()!=ACTIVE) {setStatus(Elevator.ACTIVE);}
+       /*if(getStatus()!=ACTIVE) {setStatus(Elevator.ACTIVE);}
         boolean result = false;
         int floorToGo = p.getFloor();
         int direction = p.getDirection();
@@ -135,6 +153,11 @@ public class Elevator extends Observable{
         }
         result = result&&isOverweight();
         if(result==false) System.out.println("Error overloadiing");
+        */
+        boolean result = false;
+        if(!this.passengers.add(p)) return result;
+        result = this.addRequest(new Request(p.getDirection(),p.getFloor()));
+        result = result && isOverweight();
         return result;
     }
     /*

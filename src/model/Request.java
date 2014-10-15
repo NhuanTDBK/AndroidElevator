@@ -7,7 +7,7 @@
 package model;
 
 /**
- *
+ * Đối tượng request chứa thông tin tầng di chuyển và hướng
  * @author Nhuan
  */
 public class Request {
