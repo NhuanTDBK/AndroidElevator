@@ -6,11 +6,13 @@
 
 package model;
 
+import java.util.Comparator;
+
 /**
  * Đối tượng request chứa thông tin tầng di chuyển và hướng
  * @author Nhuan
  */
-public class Request {
+public class Request implements Comparable<Request> {
     private int direction;
     private int floor;
     //construct direction and floor
@@ -34,6 +36,14 @@ public class Request {
     public void setFloor(int floor)
     {
         this.floor = floor;
+    }
+
+    @Override
+    public int compareTo(Request o) {
+        if(o.getDirection()==this.direction&&o.getFloor()==this.floor)
+            return 0;
+        else return 1;
+        
     }
 }
     

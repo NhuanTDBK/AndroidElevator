@@ -1,9 +1,7 @@
 package model;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-import controller.Controller;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -29,21 +27,28 @@ public class RequestQueue extends PriorityQueue<Integer>{
 
     private PriorityQueue<Integer> upQueue;
     private PriorityQueue<Integer> downQueue;
-    private ArrayList<Integer>floorQueue;
+    //private ArrayList<Integer>floorQueue;
     public RequestQueue() {
-        upQueue = new PriorityQueue<Integer>(100);
+        upQueue = new PriorityQueue<>(20);
         NumberComparator com = new NumberComparator();
         
-        downQueue = new PriorityQueue<Integer>(100, com);
-        floorQueue = new ArrayList<Integer>(Controller.MAX_FLOOR);
+        downQueue = new PriorityQueue<>(20, com);
+        //floorQueue = new ArrayList<Integer>(Controller.MAX_FLOOR);
     }
-    
+    public boolean containFloor(int floor,int direction)
+    {
+        boolean check=false;
+        if(direction==Elevator.UP) check=upQueue.contains(floor);
+        else check=downQueue.contains(floor);
+        return check;
+    }
     public boolean checkFloorInRequest(int floor,int direction)
     {
         if(direction==Elevator.UP) return upQueue.contains(floor);
         else return downQueue.contains(floor);
                 
     }
+    
     /*
      Lấy tầng lớn nhất ở hàng đợi đi xuống
      */
@@ -61,10 +66,40 @@ public class RequestQueue extends PriorityQueue<Integer>{
         int result = upQueue.peek();
         return result;
     }
+    /*
+        Lớn nhất còn nhỏ hơn floor
+    */
+    public int getMaxDown(int floorNow)
+    {
+        int max = 1;if(floorNow==1) return 1;
+        for(Integer i:downQueue)
+        {
+            if(i<floorNow&&i>max) max = i;
+        }
+        return max;
+    }
+    /*
+        Nhỏ nhất còn lớn nhất hơn floor
+    */
+    public int getMinUp(int floorNow)
+    {
+        int min = 1;
+        for(Integer i:upQueue)
+        {
+            if(i>floorNow&&i<min) min = i;
+        }
+        return min;
+    }
     public boolean checkRequest(int direction)
     {
-        if(direction==Elevator.UP) return !isUpRequestEmpty();
-        else return !isDownRequestEmpty();
+        if(direction==Elevator.UP) 
+        {
+            return isUpRequestEmpty() != true;
+        }
+        else 
+        {
+            return isDownRequestEmpty() != true;
+        }
     }
     public int getNextFloor(int direction)
     {
@@ -79,14 +114,7 @@ public class RequestQueue extends PriorityQueue<Integer>{
         else return removeDown(floor);
 
     }
-    public void add(Request request)
-    {
-        int direction = request.getDirection();
-        int floor = request.getFloor();
-        int temp = floorQueue.get(floor);
-        temp += direction;
-        floorQueue.set(floor, temp);
-    }
+    
     
     /*
      Thêm tầng yêu cầu vào hàng đợi, kiểm tra để tránh các yêu cầu trùng lặp
@@ -134,9 +162,7 @@ public class RequestQueue extends PriorityQueue<Integer>{
     @Override
     public boolean isEmpty()
     {
-        if(upQueue.isEmpty()&&downQueue.isEmpty())
-        return true;
-        return false;
+        return upQueue.isEmpty()&&downQueue.isEmpty();
     }
     /*
     public boolean isEmpty(int direction)
@@ -146,12 +172,10 @@ public class RequestQueue extends PriorityQueue<Integer>{
     } */
     public boolean isUpRequestEmpty()
     {
-        if(upQueue.isEmpty()) return true;
-        return false;
+        return upQueue.isEmpty();
     }
     public boolean isDownRequestEmpty()
     {
-        if(downQueue.isEmpty()) return true;
-        return false;
+        return downQueue.isEmpty();
     }
 }

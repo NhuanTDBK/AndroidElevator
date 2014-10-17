@@ -14,15 +14,15 @@ package model;
  * như chiều cao, hoạt ảnh, cử động ra sao?
  */
 public class Passenger extends Request {
-    private int _weight;
+    private int _weight=40;
     public Passenger(int floor, int direction)
     {
-        super(direction,floor);
+        super(floor,direction);
     }
     public Passenger(int floor,int direction,int weight)
     {   
         
-        super(direction,floor);
+        super(floor,direction);
         this._weight = weight;
     }
     public int getWeight()

@@ -9,18 +9,21 @@ import java.util.Set;
  *
  * @author Nhuan
  */
-public class Floor {
+public class Floor{ 
 
     public int id;//vi tri cua tang
     public Set<Request> requests;
     public ArrayList<Passenger> passengers;
-
+  
     public Floor(int id) {
         this.id = id;
         this.requests = new HashSet<>(2);
         this.passengers = new ArrayList<Passenger>();
     }
-
+ 
+    /*
+        Them yeu cau vao tang
+    */
     public boolean addRequest(int direction) {
         boolean check=true;
         if (requests.size() == 2) {
@@ -39,6 +42,9 @@ public class Floor {
         return check;
        //System.out.println(check);
     }
+    /*
+        Them khach dung cho o tang
+    */
     public boolean addPassenger(Passenger p )
     {
         boolean check=true;
@@ -54,5 +60,6 @@ public class Floor {
     {
         return requests.isEmpty();
     }
+    
 
 }

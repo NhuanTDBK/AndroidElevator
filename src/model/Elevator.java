@@ -156,7 +156,7 @@ public class Elevator extends Observable{
         */
         boolean result = false;
         if(!this.passengers.add(p)) return result;
-        result = this.addRequest(new Request(p.getDirection(),p.getFloor()));
+        result = this.addRequest(new Request(p.getFloor(),p.getDirection()));
         result = result && isOverweight();
         return result;
     }
