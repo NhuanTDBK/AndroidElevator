@@ -1,38 +1,56 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ 
  */
 package controller;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.function.Predicate;
-import javax.swing.text.View;
+import java.util.List;
 import model.Elevator;
 import model.Floor;
 import model.Passenger;
 import model.Request;
-import view.*;
 
 /**
  *
  * @author Nhuan
  */
-public class Controller implements ActionListener {
+public class Controller {
 
-    private Elevator elevators;
-    public Floor[] floors;
+    public Elevator[] elevators;
 
-    private View view;
+    public Elevator[] getElevators() {
+        return elevators;
+    }
+    
+    /**
+     *
+     * @param id bat dau tu 0
+     * @return
+     */
+    public Elevator getElevatorWithID(int id)
+    {
+        return elevators[id];
+    }
+    private Floor[] floors;
+
+    public Floor[] getFloors() {
+        return floors;
+    }
     public static final int MAX_FLOOR = 10;//số lượng tầng tối đa
+    public static final int MAX_ELEVATOR =2;
+    /**
+     *
+     * Khởi tạo số thang mays
+     */
+    public Controller(int num_of_elevators) {
 
-    public Controller() {
-
-        elevators = new Elevator(1);
+        elevators = new Elevator[num_of_elevators];
         //So tang duoc config
+        for (int i = 0; i < num_of_elevators; i++) {
+            elevators[i] = new Elevator(i);
+            elevators[i].setFloor(0);
+            elevators[i].setStatus(Elevator.IDLE);
+        }
         floors = new Floor[Controller.MAX_FLOOR];
         /*
          * Khoi tao floor, gan so hieu
@@ -41,16 +59,13 @@ public class Controller implements ActionListener {
             floors[i] = new Floor(i);
         }
     }
-
-    public void setView(View view) {
-        this.view = view;
+    /*
+        Thêm yêu cầu vào thang máy nhập vào
+    */
+    public boolean addRequest(Elevator elevator, Request request)
+    {
+       return elevator.addRequest(request);
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     /**
      *
      * Đầu vào : Tầng hiện tại Đầu ra: Lấy tầng thấp nhất mà cao hơn tầng hiện
@@ -65,7 +80,7 @@ public class Controller implements ActionListener {
         }
         for (Floor temp : floors) {
             int floor = temp.id;
-            
+
             if (floor >= floorNow && floor < min && !floors[floor].requests.isEmpty()) {
                 min = floor;
                 break;
@@ -82,7 +97,7 @@ public class Controller implements ActionListener {
         int max = 0;
         for (Floor temp : floors) {
             int floor = temp.id;
-            if (floor <=floorNow && floor > max&&!floors[floor].requests.isEmpty()) {
+            if (floor <= floorNow && floor > max && !floors[floor].requests.isEmpty()) {
                 max = floor;
             }
         }
@@ -90,8 +105,14 @@ public class Controller implements ActionListener {
     }
 
     /*
-     Đầu ra: Kiểm tra tín hiệu từ các thang
+   
      */
+
+    /**
+     *  Đầu ra: Kiểm tra tín hiệu từ các thang
+     * @return
+     */
+    
     public boolean isEmpty() {
         int i = 0;
         boolean check = true;
@@ -106,7 +127,9 @@ public class Controller implements ActionListener {
         }
         return check;
     }
-
+    /*
+        Add request cho floor
+    */
     public boolean addRequest(int floorNow, int direction) {
         boolean check = true;
         if (floors[floorNow].requests.size() == 2) {
@@ -116,7 +139,7 @@ public class Controller implements ActionListener {
             if (floorNow != Controller.MAX_FLOOR) {
                 Request r = new Request(floorNow, direction);
                 check = floors[floorNow].requests.add(r);
-            } else if (floorNow== Controller.MAX_FLOOR-1) {
+            } else if (floorNow == Controller.MAX_FLOOR - 1) {
                 check = floors[floorNow].requests.add(new Request(floorNow, Elevator.DOWN));
             } else if (floorNow == 0) {
                 check = floors[floorNow].requests.add(new Request(floorNow, Elevator.UP));
@@ -141,8 +164,7 @@ public class Controller implements ActionListener {
     public boolean addPassenger(int floorNow, Passenger p) {
         boolean check = true;
         int direction = p.getDirection();
-        if(p.getFloor()<=floorNow&&p.getDirection()==Elevator.UP) 
-        {
+        if (p.getFloor() <= floorNow && p.getDirection() == Elevator.UP) {
             System.out.println("What's wrong with you?");
             return false;
         }
@@ -154,25 +176,79 @@ public class Controller implements ActionListener {
     }
 
     public boolean hasRequest(int floorNow, int direction) {
-        
+
         Request t = new Request(floorNow, direction);
         return floors[floorNow].requests.stream().anyMatch((temp) -> (temp.compareTo(t) == 0));
     }
+
     //Đầu vào: Tầng hiện tại và hướng
     //Đầu ra: Danh sách khách chờ
-    public ArrayList<Passenger> getPassengerFromFloor(int floor,int direction)
-    {
+
+    public ArrayList<Passenger> getPassengerFromFloor(int floor, int direction) {
         ArrayList<Passenger> temp = new ArrayList<>();
-        for(Passenger p:floors[floor].passengers)
-        {
-            if(p.getDirection()==direction) 
-            {
-                temp.add(p);
-                
-            }
-        }
+        floors[floor].passengers.stream().filter((p) -> (p.getDirection() == direction)).forEach((p) -> {
+            temp.add(p);
+        });
         floors[floor].passengers.removeAll(temp);
         return temp;
     }
+    
+    public int moveDown(Elevator elevator) {
+        int floorNow = elevator.getFloor();
+        int direction;
+        while (this.getMaxDown(floorNow) != 0 || elevator.request.checkRequest(Elevator.DOWN)) {
 
+            direction = Elevator.DOWN;
+            elevator.setDirection(direction);
+            elevator.move(floorNow);
+
+            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
+                elevator.door.open();
+                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
+                if (!passengers.isEmpty()) {
+                    for (Passenger passenger : passengers) {
+                        elevator.addPassenger(passenger);
+                    }
+                }
+                elevator.door.close();
+                removeRequest(floorNow, direction);
+            }
+            floorNow--;
+            if (floorNow == -1) {
+                break;
+            }
+        }
+        return floorNow;
+    }
+
+    public int moveUp(Elevator elevator) {
+        int floorNow = elevator.getFloor(), direction;
+        floorNow = elevator.getFloor();
+        while (getMinUp(floorNow) != Integer.MAX_VALUE || elevator.request.checkRequest(Elevator.UP)) {
+
+            direction = Elevator.UP;
+            elevator.setDirection(direction);
+            elevator.move(floorNow);
+
+            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
+                elevator.door.open();
+                //add khach o tang do' neu co'      
+                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
+                if (!passengers.isEmpty()) {
+                    for (Passenger passenger : passengers) {
+                        elevator.addPassenger(passenger);
+                    }
+                }
+                elevator.door.close();
+                removeRequest(floorNow, direction);
+            }
+            if (floorNow == Controller.MAX_FLOOR - 1) {
+                break;
+            }
+            floorNow++;
+        }
+        return floorNow;
+    }
+    
+    
 }

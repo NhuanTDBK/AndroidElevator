@@ -101,12 +101,7 @@ public class RequestQueue extends PriorityQueue<Integer>{
             return isDownRequestEmpty() != true;
         }
     }
-    public int getNextFloor(int direction)
-    {
-        if(direction == Elevator.UP) return getMinUp();
-        else if(direction==Elevator.DOWN) return getMaxDown();
-        return 0;
-    }
+   
     public boolean removeFloor(int direction,int floor)
     {
         if(direction==Elevator.UP) 
@@ -177,5 +172,9 @@ public class RequestQueue extends PriorityQueue<Integer>{
     public boolean isDownRequestEmpty()
     {
         return downQueue.isEmpty();
+    }
+    public int getSize()
+    {
+        return upQueue.size() + downQueue.size();
     }
 }

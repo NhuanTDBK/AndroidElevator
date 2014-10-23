@@ -5,6 +5,10 @@
  */
 package view;
 
+import java.awt.Component;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 /**
  *
  * @author Nhuan
@@ -14,8 +18,17 @@ public class Demo extends javax.swing.JFrame {
     /**
      * Creates new form Demo
      */
+    ImageIcon image = new ImageIcon("C:\\Users\\Nhuan\\Documents\\NetBeansProjects\\AndroidElevator\\src\\view\\Images\\Car.png");
+    ImageIcon backgroundImage = new ImageIcon("C:\\Users\\Nhuan\\Documents\\NetBeansProjects\\AndroidElevator\\src\\view\\Images\\ElevatorBackground.png");
+ 
     public Demo() {
         initComponents();
+        jLayeredPane1.add(new JLabel(image),2);
+        jLayeredPane1.add(new JLabel(backgroundImage),1);
+        this.setLayout(null);
+        this.setLayeredPane(jLayeredPane1);
+        Component add;
+        add = this.add(jLayeredPane1);
     }
 
     /**
@@ -27,17 +40,36 @@ public class Demo extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLayeredPane1 = new javax.swing.JLayeredPane();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
+        jLayeredPane1.setLayout(jLayeredPane1Layout);
+        jLayeredPane1Layout.setHorizontalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 217, Short.MAX_VALUE)
+        );
+        jLayeredPane1Layout.setVerticalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 161, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(133, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(58, 58, 58)
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(81, Short.MAX_VALUE))
         );
 
         pack();
@@ -71,13 +103,12 @@ public class Demo extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Demo().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new Demo().setVisible(true);
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLayeredPane jLayeredPane1;
     // End of variables declaration//GEN-END:variables
 }
