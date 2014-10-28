@@ -6,23 +6,22 @@
 
 package view;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import java.util.Observable;
+import java.util.Observer;
+
+
 
 /**
  *
  * @author Nhuan
  */
-public class View implements Observable{
+public class View implements Observer{
 
     @Override
-    public void addListener(InvalidationListener listener) {
+    public void update(Observable o, Object arg) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+ 
     
 }

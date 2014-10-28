@@ -18,7 +18,7 @@ import model.Elevator;
  *
  * @author Nhuan
  */
-public class ElevatorUI extends JPanel implements IElevator, Runnable {
+public class ElevatorUI extends JPanel implements Runnable,IElevator {
 
     private ImageIcon image = new ImageIcon("C:\\Users\\Nhuan\\Documents\\NetBeansProjects\\AndroidElevator\\src\\view\\Images\\Car.png");
     private Elevator elevator;
@@ -33,24 +33,7 @@ public class ElevatorUI extends JPanel implements IElevator, Runnable {
         this.elevator = new Elevator(id);
     }
 
-    @Override
-    public void move(int floor) {
-        
-    }
-
-    @Override
-    public void pause() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ElevatorUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    @Override
-    public void stop() {
-
-    }
+   
 
     @Override
     public void run() {
@@ -66,6 +49,26 @@ public class ElevatorUI extends JPanel implements IElevator, Runnable {
                 Logger.getLogger(ElevatorUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    @Override
+    public void addPassenger(IPassenger passenger) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removePassenger(IPassenger passenger) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void open() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void close() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

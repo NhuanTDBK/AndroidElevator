@@ -11,6 +11,6 @@ package model;
  * @author Nhuan
  */
 public interface IDoor {
-    void open();
-    void close();
+    void open();//Đóng cửa
+    void close();//Mở cửa
 }

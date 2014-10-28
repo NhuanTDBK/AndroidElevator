@@ -21,13 +21,13 @@ public class Elevator extends Observable {
     public static final int WEIGHT = 100;//trọng tải của thang máy( không có hành khách)
     public static final int WARNING_WEIGHT = 150;//trọng tải tối đa
     public ArrayList<Passenger> passengers;//Số hành khách trong thang
-    public RequestQueue request;//Yêu cầu của hành khách
-    public Door door;           //Cửa thang máy
-    private final int _id;            //id của thang máy. Dùng để phân biệt các thang máy
-    private int _direction;     //Hướng đi của thang máy hiện tại
-    private int _floor;         //Tầng 
-    private int _status;        //trạng thái của thang máy
-    private int _weight;        //trọng lượng thang máy
+    public RequestQueue request; //Yêu cầu của hành khách
+    public Door door;            //Cửa thang máy
+    private final int _id;       //id của thang máy. Dùng để phân biệt các thang máy
+    private int _direction;      //Hướng đi của thang máy hiện tại
+    private int _floor;          //Tầng 
+    private int _status;         //trạng thái của thang máy
+    private int _weight;         //trọng lượng thang máy
     private int _numofpassengers;//Tổng số khách trong 1 lượt đi
 
     public Elevator(int id) {
@@ -92,19 +92,40 @@ public class Elevator extends Observable {
         this._direction = direction;
     }
 
+    /*
+        Thông báo thông tin trạng thái thang
+    */
     public void setStatus(int status) {
         this._status = status;
+        setChanged();
+        notifyObservers();
     }
-
+    /*
+        Thông báo tầng hiện tại của thang
+    */
     public void setFloor(int floor) {
         this._floor = floor;
+        setChanged();
+        notifyObservers();
+    }
+
+    public void move(int direction) {
+        int floorNow = this.getFloor();
+        if (direction == UP) {
+            floorNow++;
+        } else {
+            floorNow--;
+        }
+        System.out.println("Elevator" + this._id + ": Thang may di " + convert(direction) + " tang " + floorNow);
+
+        this.setFloor(floorNow);
     }
     /*
      Đầu vào: Các yêu cầu từ các tầng hiện tại (Liên tục cập nhật)
      Chức năng: Đi đến tầng có yêu cầu
      */
 
-    public void move(int floor) {
+    public void work() throws InterruptedException {
 
         int floorNow = this.getFloor();
         while (request.getSize() != 0) {
@@ -112,11 +133,18 @@ public class Elevator extends Observable {
                 int destination = request.getMinUp();
                 int direction = (destination - floorNow) >= 0 ? UP : DOWN;
                 while (floorNow != destination) {
-                    floorNow = floorNow + direction * 1;
-                    System.out.println("Elevator" + this._id + ": Thang may di " + convert(direction) + " tang " + floorNow);
-                    this.setFloor(floorNow);
+                    floorNow += 1*direction;
+                    this.move(direction);
                 }
                 this.door.open();
+                this.setStatus(Elevator.PAUSE);
+                /*
+                while(this.getStatus()!=Elevator.PAUSE)
+                {
+                    //wait();
+                    //notify();
+                }
+                */
                 this.door.close();
                 this.request.removeUp(floorNow);
             }
@@ -124,11 +152,17 @@ public class Elevator extends Observable {
                 int destination = request.getMaxDown();
                 int direction = (destination - floorNow) >= 0 ? UP : DOWN;
                 while (floorNow != destination) {
-                    floorNow += direction * 1;
-                    System.out.println("Elevator" + this._id + ": Thang may di " + convert(direction) + " tang " + floorNow);
-                    this.setFloor(floorNow);
+                    floorNow += 1*direction;
+                    this.move(direction);
                 }
                 this.door.open();
+                /*
+                while(this.getStatus()!=Elevator.PAUSE)
+                {
+                    //wait();
+                    //notify();
+                }
+                */
                 this.door.close();
                 this.request.removeDown(floorNow);
             }
@@ -140,9 +174,10 @@ public class Elevator extends Observable {
     public String convert(int direction) {
         return direction == Elevator.UP ? "len" : "xuong";
     }
- 
+
     /**
      * Add request vào queue
+     *
      * @param request
      * @return
      */
@@ -160,7 +195,6 @@ public class Elevator extends Observable {
         }
         return result;
     }
- 
 
     /**
      * Thêm hàng khách có thiết lập rule, cài đặt lại khi có GUI
@@ -178,9 +212,14 @@ public class Elevator extends Observable {
         return result;
     }
     /*
-     Cài đặt lại khi có GUI
+    
      */
 
+    /**
+     * Cho hành khách đi ra khỏi thang
+     * @param floor
+     * @return
+     */
     public boolean removePassenger(int floor) {
 
         //if(getStatus()!=STOP) return false;
@@ -221,4 +260,5 @@ public class Elevator extends Observable {
         int weight = getTotalWeight();
         return (weight >= WARNING_WEIGHT);
     }
+    
 }

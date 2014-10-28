@@ -14,14 +14,12 @@ import model.Request;
  *
  * @author Nhuan
  */
-public class Controller {
+public class Controller  {
 
     public Elevator[] elevators;
-
     public Elevator[] getElevators() {
         return elevators;
     }
-    
     /**
      *
      * @param id bat dau tu 0
@@ -41,6 +39,7 @@ public class Controller {
     /**
      *
      * Khởi tạo số thang mays
+     * @param num_of_elevators
      */
     public Controller(int num_of_elevators) {
 
@@ -59,11 +58,18 @@ public class Controller {
             floors[i] = new Floor(i);
         }
     }
-    /*
-        Thêm yêu cầu vào thang máy nhập vào
-    */
+   
+    /**
+     *Thêm yêu cầu vào thang máy nhập vào
+     * @param elevator
+     * @param request
+     * @return
+     */
+    
     public boolean addRequest(Elevator elevator, Request request)
     {
+       elevator.setStatus(Elevator.ACTIVE);
+       elevator.setDirection(request.getDirection());
        return elevator.addRequest(request);
     }
     /**
@@ -88,11 +94,13 @@ public class Controller {
         }
         return min;
     }
-    /*
-     Đầu vào: Tầng hiện tại
-     Đầu ra: Lấy tầng cao nhất mà nhỏ hơn tầng hiện tại
+    
+    /**
+     * Đầu vào: Tầng hiện tại
+     * Đầu ra: Lấy tầng cao nhất mà nhỏ hơn tầng hiện tại
+     * @param floorNow
+     * @return
      */
-
     public int getMaxDown(int floorNow) {
         int max = 0;
         for (Floor temp : floors) {
@@ -103,10 +111,6 @@ public class Controller {
         }
         return max;
     }
-
-    /*
-   
-     */
 
     /**
      *  Đầu ra: Kiểm tra tín hiệu từ các thang
@@ -127,11 +131,22 @@ public class Controller {
         }
         return check;
     }
-    /*
-        Add request cho floor
-    */
+   
+    /**
+     * Thêm 1 yêu cầu xuất phát từ tầng floorNow, hướng direction
+     * @param floorNow
+     * @param direction
+     * @return
+     */
+    
     public boolean addRequest(int floorNow, int direction) {
         boolean check = true;
+        if(floorNow==MAX_FLOOR) 
+        {
+            check=false;
+            System.out.println("Bam nham roi?");
+            return check;
+        }
         if (floors[floorNow].requests.size() == 2) {
             System.out.println("Khong the bam them duoc");
         } else {
@@ -148,19 +163,26 @@ public class Controller {
         return check;
         //System.out.println(check);
     }
-    /*
-     Đầu vào: tầng hiện tại
-     Đầu ra: Xóa yêu cầu ở tầng đó
-     */
 
+    /**
+     *Đầu vào: tầng hiện tại
+     *Đầu ra: Xóa yêu cầu ở tầng đó
+     * @param floorNow
+     * @param direction
+     * @return
+     */
     public int removeRequest(int floorNow, int direction) {
         floors[floorNow].requests.removeIf((Request t) -> (t.getFloor() == floorNow && t.getDirection() == direction));
         return 1;
     }
 
-    /*
-     Them khach dung cho o tang
+    /**
+     * Tạo 1 hành khách đứng ở tầng floorNow, có yêu cầu 
+     * @param floorNow
+     * @param p
+     * @return
      */
+    
     public boolean addPassenger(int floorNow, Passenger p) {
         boolean check = true;
         int direction = p.getDirection();
@@ -175,15 +197,28 @@ public class Controller {
         return check;
     }
 
+    /**
+     *  Kiểm tra tầng floorNow có yêu cầu nào hay không?
+     * @param floorNow
+     * @param direction
+     * @return
+     */
     public boolean hasRequest(int floorNow, int direction) {
 
         Request t = new Request(floorNow, direction);
         return floors[floorNow].requests.stream().anyMatch((temp) -> (temp.compareTo(t) == 0));
     }
 
-    //Đầu vào: Tầng hiện tại và hướng
-    //Đầu ra: Danh sách khách chờ
 
+    /**
+     *
+        *Đầu vào: Tầng hiện tại và hướng
+        *Đầu ra: Danh sách khách chờ
+     * @param floor
+     * @param direction
+     * @return
+     */
+    
     public ArrayList<Passenger> getPassengerFromFloor(int floor, int direction) {
         ArrayList<Passenger> temp = new ArrayList<>();
         floors[floor].passengers.stream().filter((p) -> (p.getDirection() == direction)).forEach((p) -> {
@@ -193,62 +228,62 @@ public class Controller {
         return temp;
     }
     
-    public int moveDown(Elevator elevator) {
-        int floorNow = elevator.getFloor();
-        int direction;
-        while (this.getMaxDown(floorNow) != 0 || elevator.request.checkRequest(Elevator.DOWN)) {
-
-            direction = Elevator.DOWN;
-            elevator.setDirection(direction);
-            elevator.move(floorNow);
-
-            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
-                elevator.door.open();
-                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
-                if (!passengers.isEmpty()) {
-                    for (Passenger passenger : passengers) {
-                        elevator.addPassenger(passenger);
-                    }
-                }
-                elevator.door.close();
-                removeRequest(floorNow, direction);
-            }
-            floorNow--;
-            if (floorNow == -1) {
-                break;
-            }
-        }
-        return floorNow;
-    }
-
-    public int moveUp(Elevator elevator) {
-        int floorNow = elevator.getFloor(), direction;
-        floorNow = elevator.getFloor();
-        while (getMinUp(floorNow) != Integer.MAX_VALUE || elevator.request.checkRequest(Elevator.UP)) {
-
-            direction = Elevator.UP;
-            elevator.setDirection(direction);
-            elevator.move(floorNow);
-
-            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
-                elevator.door.open();
-                //add khach o tang do' neu co'      
-                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
-                if (!passengers.isEmpty()) {
-                    for (Passenger passenger : passengers) {
-                        elevator.addPassenger(passenger);
-                    }
-                }
-                elevator.door.close();
-                removeRequest(floorNow, direction);
-            }
-            if (floorNow == Controller.MAX_FLOOR - 1) {
-                break;
-            }
-            floorNow++;
-        }
-        return floorNow;
-    }
+//    public int moveDown(Elevator elevator) {
+//        int floorNow = elevator.getFloor();
+//        int direction;
+//        while (this.getMaxDown(floorNow) != 0 || elevator.request.checkRequest(Elevator.DOWN)) {
+//
+//            direction = Elevator.DOWN;
+//            elevator.setDirection(direction);
+//            elevator.move(floorNow);
+//
+//            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
+//                elevator.door.open();
+//                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
+//                if (!passengers.isEmpty()) {
+//                    for (Passenger passenger : passengers) {
+//                        elevator.addPassenger(passenger);
+//                    }
+//                }
+//                elevator.door.close();
+//                removeRequest(floorNow, direction);
+//            }
+//            floorNow--;
+//            if (floorNow == -1) {
+//                break;
+//            }
+//        }
+//        return floorNow;
+//    }
+//
+//    public int moveUp(Elevator elevator) {
+//        int floorNow = elevator.getFloor(), direction;
+//        floorNow = elevator.getFloor();
+//        while (getMinUp(floorNow) != Integer.MAX_VALUE || elevator.request.checkRequest(Elevator.UP)) {
+//
+//            direction = Elevator.UP;
+//            elevator.setDirection(direction);
+//            elevator.move(floorNow);
+//
+//            if (hasRequest(floorNow, direction) || elevator.request.containFloor(floorNow, direction)) {
+//                elevator.door.open();
+//                //add khach o tang do' neu co'      
+//                List<Passenger> passengers = getPassengerFromFloor(floorNow, direction);
+//                if (!passengers.isEmpty()) {
+//                    for (Passenger passenger : passengers) {
+//                        elevator.addPassenger(passenger);
+//                    }
+//                }
+//                elevator.door.close();
+//                removeRequest(floorNow, direction);
+//            }
+//            if (floorNow == Controller.MAX_FLOOR - 1) {
+//                break;
+//            }
+//            floorNow++;
+//        }
+//        return floorNow;
+//    }
     
     
 }

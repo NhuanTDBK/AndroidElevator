@@ -72,6 +72,8 @@ public class chuyendong extends JFrame implements ActionListener {
                         
                         //Luong tam dung
                         Thread.sleep(10);
+                        if(index>=4) 
+                            break;
                     }
                 } catch (InterruptedException e) {
                 }
