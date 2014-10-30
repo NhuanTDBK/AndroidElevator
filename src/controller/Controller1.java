@@ -52,18 +52,17 @@ public class Controller1 implements ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
+      
     }
     //sự kiến bấm nút gọi thang
     public void callButton_Click()
     {
         Request request = new Request(1,1);
-        IFloor floor = new FloorUI();
+        //IFloor floor = new FloorUI();
         int elevator_id = strategy.findOptimalElevator(request, elevators);
         addRequest(elevator_id, request);
-        floor.setFloor(request.getFloor());
-        floor.setDirection(request.getDirection());
+        //floor.setFloor(request.getFloor());
+        //floor.setDirection(request.getDirection());
     }
     
 }

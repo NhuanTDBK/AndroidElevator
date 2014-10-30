@@ -193,6 +193,9 @@ public class Elevator extends Observable {
         } else if (direction == Elevator.DOWN) {
             result = this.request.addDown(floorToGo);
         }
+        setChanged();
+        final int HAS_REQUEST = 4;
+        notifyObservers(HAS_REQUEST);
         return result;
     }
 

@@ -35,20 +35,18 @@ public class RequestQueue extends PriorityQueue<Integer>{
         downQueue = new PriorityQueue<>(20, com);
         //floorQueue = new ArrayList<Integer>(Controller.MAX_FLOOR);
     }
-    public boolean containFloor(int floor,int direction)
+    public int getNextDestination()
     {
-        boolean check=false;
-        if(direction==Elevator.UP) check=upQueue.contains(floor);
-        else check=downQueue.contains(floor);
-        return check;
+        while(upQueue.size()!=0)
+        {
+            return getMinUp();
+        }
+        while(downQueue.size()!=0)
+        {
+            return getMaxDown();
+        }
+        return -1;
     }
-    public boolean checkFloorInRequest(int floor,int direction)
-    {
-        if(direction==Elevator.UP) return upQueue.contains(floor);
-        else return downQueue.contains(floor);
-                
-    }
-    
     /*
      Lấy tầng lớn nhất ở hàng đợi đi xuống
      */
@@ -90,18 +88,6 @@ public class RequestQueue extends PriorityQueue<Integer>{
         }
         return min;
     }
-    public boolean checkRequest(int direction)
-    {
-        if(direction==Elevator.UP) 
-        {
-            return isUpRequestEmpty() != true;
-        }
-        else 
-        {
-            return isDownRequestEmpty() != true;
-        }
-    }
-   
     public boolean removeFloor(int direction,int floor)
     {
         if(direction==Elevator.UP) 

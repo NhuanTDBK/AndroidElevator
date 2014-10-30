@@ -14,7 +14,7 @@ public class chuyendong extends JFrame implements ActionListener {
 
    
     //JPanel jp1 = new JPanel();
-    ImageIcon image = new ImageIcon("C:\\Users\\Nhuan\\Documents\\NetBeansProjects\\AndroidElevator\\src\\view\\Images\\Car.png");
+    ImageIcon image = new ImageIcon();
     ImageIcon backgroundImage = new ImageIcon("C:\\Users\\Nhuan\\Documents\\NetBeansProjects\\AndroidElevator\\src\\view\\Images\\ElevatorBackground.png");
     JLabel background = new JLabel();
     //Toa do cua panel
