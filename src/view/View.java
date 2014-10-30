@@ -16,21 +16,14 @@ import model.Elevator;
  *
  * @author Nhuan
  */
-public class View implements Observer{
+public class View{
     final int HAS_REQUEST = 4;
     IElevator elevator1 = new ElevatorUI(0);
     IElevator elevator2 = new ElevatorUI(1);
     ElevatorUI e1 = new ElevatorUI(1);
     Thread t1 = new Thread();
     Thread t2 = new Thread();
-    @Override
-    public void update(Observable o, Object arg) {
-        if((Integer)arg==HAS_REQUEST)
-        {
-            Elevator elevator = (Elevator)o;
-            e1.run();
-        }
-    }
+    
 
  
     

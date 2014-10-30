@@ -35,7 +35,7 @@ public class ElevatorSystem {
             /*
                 Liên kết Model-View
             */
-            elevators[i].addObserver(view);
+   
         }
         
     }

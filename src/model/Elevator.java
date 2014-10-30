@@ -3,13 +3,22 @@ package model;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Observable;
+import view.IElevator;
+import view.IPassenger;
 
 /**
  *
  * @author Nhuan Lớp thang máy
  */
-public class Elevator extends Observable {
+public class Elevator implements IElevator {
 
+    private static int[] blockFloors = new int[5];
+
+    ;
+
+    public static void setBlockFloors(int[] blockFloors) {
+        Elevator.blockFloors = blockFloors;
+    }
     public static final int MAX_PASSENGER = 10; //số lượng hành khác tối đa trong thang máy
     public static final int UP = 1, //hướng đi lên
             DOWN = -1; //hướng đi xuống
@@ -17,7 +26,8 @@ public class Elevator extends Observable {
             IDLE = 1, //trạng thái rảnh rỗi, không làm việc.
             ACTIVE = 2, //trạng thái đang làm việc. 
             PAUSE = 3;//trạng thái tạm dừng. Dùng cho trường hợp đón, trả khách
-
+    public static final int BLOCK = 1;
+    public static final int UNBLOCK = 0;
     public static final int WEIGHT = 100;//trọng tải của thang máy( không có hành khách)
     public static final int WARNING_WEIGHT = 150;//trọng tải tối đa
     public ArrayList<Passenger> passengers;//Số hành khách trong thang
@@ -28,7 +38,7 @@ public class Elevator extends Observable {
     private int _floor;          //Tầng 
     private int _status;         //trạng thái của thang máy
     private int _weight;         //trọng lượng thang máy
-    private int _numofpassengers;//Tổng số khách trong 1 lượt đi
+    //private int _numofpassengers;//Tổng số khách trong 1 lượt đi
 
     public Elevator(int id) {
         System.out.println("Elevator " + (id + 1) + " : online");
@@ -37,6 +47,10 @@ public class Elevator extends Observable {
         passengers = new ArrayList<>();
         request = new RequestQueue();
         this._status = IDLE;
+
+        for (int i = 0; i < 5; i++) {
+            blockFloors[i] = 0;
+        }
     }
 
     /**
@@ -93,82 +107,19 @@ public class Elevator extends Observable {
     }
 
     /*
-        Thông báo thông tin trạng thái thang
-    */
+     Thông báo thông tin trạng thái thang
+     */
     public void setStatus(int status) {
         this._status = status;
-        setChanged();
-        notifyObservers();
+
     }
     /*
-        Thông báo tầng hiện tại của thang
-    */
-    public void setFloor(int floor) {
-        this._floor = floor;
-        setChanged();
-        notifyObservers();
-    }
-
-    public void move(int direction) {
-        int floorNow = this.getFloor();
-        if (direction == UP) {
-            floorNow++;
-        } else {
-            floorNow--;
-        }
-        System.out.println("Elevator" + this._id + ": Thang may di " + convert(direction) + " tang " + floorNow);
-
-        this.setFloor(floorNow);
-    }
-    /*
-     Đầu vào: Các yêu cầu từ các tầng hiện tại (Liên tục cập nhật)
-     Chức năng: Đi đến tầng có yêu cầu
+     Thông báo tầng hiện tại của thang
      */
 
-    public void work() throws InterruptedException {
+    public void setFloor(int floor) {
+        this._floor = floor;
 
-        int floorNow = this.getFloor();
-        while (request.getSize() != 0) {
-            while (!request.isUpRequestEmpty()) {
-                int destination = request.getMinUp();
-                int direction = (destination - floorNow) >= 0 ? UP : DOWN;
-                while (floorNow != destination) {
-                    floorNow += 1*direction;
-                    this.move(direction);
-                }
-                this.door.open();
-                this.setStatus(Elevator.PAUSE);
-                /*
-                while(this.getStatus()!=Elevator.PAUSE)
-                {
-                    //wait();
-                    //notify();
-                }
-                */
-                this.door.close();
-                this.request.removeUp(floorNow);
-            }
-            while (!request.isDownRequestEmpty()) {
-                int destination = request.getMaxDown();
-                int direction = (destination - floorNow) >= 0 ? UP : DOWN;
-                while (floorNow != destination) {
-                    floorNow += 1*direction;
-                    this.move(direction);
-                }
-                this.door.open();
-                /*
-                while(this.getStatus()!=Elevator.PAUSE)
-                {
-                    //wait();
-                    //notify();
-                }
-                */
-                this.door.close();
-                this.request.removeDown(floorNow);
-            }
-
-        }
-        //Cài đặt sau
     }
 
     public String convert(int direction) {
@@ -188,58 +139,77 @@ public class Elevator extends Observable {
         boolean result = false;
         int floorToGo = request.getFloor();
         int direction = request.getDirection();
+        if (!checkBlockFloor(this.getFloor(), floorToGo)) {
+            return false;
+        }
         if (direction == Elevator.UP) {
             result = this.request.addUp(floorToGo);
         } else if (direction == Elevator.DOWN) {
             result = this.request.addDown(floorToGo);
         }
-        setChanged();
-        final int HAS_REQUEST = 4;
-        notifyObservers(HAS_REQUEST);
+
         return result;
     }
 
     /**
      * Thêm hàng khách có thiết lập rule, cài đặt lại khi có GUI
+     *
      * @param p
      * @return
      */
     public boolean addPassenger(Passenger p) {
 
         boolean result = false;
+        //Kiểm tra giới hạn tầng
+        if (!checkBlockFloor(this.getFloor(), p.getFloor())) {
+            return result;
+        }
+        //Kiểm tra cân nặng
+        if(p.getWeight()+this._weight>Elevator.WARNING_WEIGHT) return false;
         if (!this.passengers.add(p)) {
             return result;
         }
+        //Nếu trọng lượng chưa vượt mức giới hạn thì cho phép hành khách đi vào
+        this._weight += p.getWeight();
         result = this.addRequest(new Request(p.getFloor(), p.getDirection()));
-        result = result && isOverweight();
         return result;
     }
-    /*
-    
-     */
-
-    /**
-     * Cho hành khách đi ra khỏi thang
-     * @param floor
-     * @return
-     */
-    public boolean removePassenger(int floor) {
-
-        //if(getStatus()!=STOP) return false;
+    public void removePassenger(Passenger passenger)
+    {
         int direction = this._direction;
-        int total_exit_passenger = 0;
         for (Passenger p : passengers) {
 
-            if (this._direction == p.getDirection() && p.getFloor() == floor) {
+            if (passenger.getDirection() == p.getDirection() && p.getFloor() == passenger.getFloor()) {
                 //Mở cửa cho ra
                 System.out.println("Elevator" + this._id + ": Hang khach di ra thang may ");
                 passengers.remove(p);
-                _weight -= p.getWeight();
-                total_exit_passenger += 1;
-            }
+                this._weight -= p.getWeight();
+               }
         }
+    }
+    /**
+     * Cho hành khách đi ra khỏi thang
+     *
+     * @param floor
+     * @return
+     */
+    @Override
+    public void removePassenger() {
 
-        return true;
+        //if(getStatus()!=STOP) return false;
+        int direction = this._direction;
+        for (Passenger p : passengers) {
+
+            if (this._direction == p.getDirection() && p.getFloor() == this.getFloor()) {
+                //Mở cửa cho ra
+                System.out.println("Elevator" + this._id + ": Hang khach di ra thang may ");
+                passengers.remove(p);
+               
+                this._weight -= p.getWeight();
+                 if(!passengers.iterator().hasNext()) 
+                     break;
+               }
+        }
     }
     /*
      Tính toán tổng khối lượng thang máy
@@ -263,5 +233,131 @@ public class Elevator extends Observable {
         int weight = getTotalWeight();
         return (weight >= WARNING_WEIGHT);
     }
-    
+
+    public static void addBlockFloor(int i) {
+        if (blockFloors[i] != BLOCK) {
+            blockFloors[i] = BLOCK;
+        }
+    }
+
+    public static void removeBlockFloor(int i) {
+        if (blockFloors[i] == BLOCK) {
+            blockFloors[i] = UNBLOCK;
+        }
+    }
+
+    /**
+     * Trả về đúng nếu tầng đi lên không bị giới hạn
+     *
+     * @param floorNow
+     * @param floorRequest
+     * @return
+     */
+    public static boolean checkBlockFloor(int floorNow, int floorRequest) {
+        boolean result = true;
+        if (blockFloors[floorNow] * blockFloors[floorRequest] == 0) {
+            return result;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void move(int direction) {
+        int floorNow = this.getFloor();
+        if (direction == UP) {
+            floorNow++;
+        } else {
+            floorNow--;
+        }
+        System.out.println("Elevator" + this._id + ": Thang may di " + convert(direction) + " tang " + (floorNow+1));
+
+        this.setFloor(floorNow);
+    }
+
+    @Override
+    public boolean addPassenger(IPassenger passenger) {
+        boolean result = false;
+        Passenger p = (Passenger) passenger;
+        if (!this.passengers.add(p)) {
+            return result;
+        }
+        if (!checkBlockFloor(this.getFloor(), p.getFloor())) {
+            return result;
+        }
+        result = this.addRequest(new Request(p.getFloor(), p.getDirection()));
+        result = result && isOverweight();
+        return result;
+    }
+
+
+    /**
+     * Mở cửa
+     */
+    @Override
+    public void open() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * Đóng cửa
+     */
+    @Override
+    public void close() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
+/*
+ Đầu vào: Các yêu cầu từ các tầng hiện tại (Liên tục cập nhật)
+ Chức năng: Đi đến tầng có yêu cầu
+ */
+    /*
+    public void work() throws InterruptedException {
+
+        
+        int floorNow = this.getFloor();
+        while (request.getSize() != 0) {
+            while (!request.isUpRequestEmpty()) {
+                int destination = request.getMinUp();
+                int direction = (destination - floorNow) >= 0 ? UP : DOWN;
+                while (floorNow != destination) {
+                    floorNow += 1*direction;
+                    this.move(direction);
+                }
+                this.door.open();
+                this.setStatus(Elevator.PAUSE);
+                /*
+                while(this.getStatus()!=Elevator.PAUSE)
+                {
+                    //wait();
+                    //notify();
+                }
+                
+                this.door.close();
+                this.request.removeUp(floorNow);
+            }
+            while (!request.isDownRequestEmpty()) {
+                int destination = request.getMaxDown();
+                int direction = (destination - floorNow) >= 0 ? UP : DOWN;
+                while (floorNow != destination) {
+                    floorNow += 1*direction;
+                    this.move(direction);
+                }
+                this.door.open();
+                /*
+                while(this.getStatus()!=Elevator.PAUSE)
+                {
+                    //wait();
+                    //notify();
+                }
+                
+                this.door.close();
+                this.request.removeDown(floorNow);
+            }
+
+        
+        }
+        //Cài đặt sau
+    }
+    */

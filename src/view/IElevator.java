@@ -13,12 +13,12 @@ package view;
 public interface IElevator extends IDoor {
     
     /**
-     * Hàm di chuyển
+     * Hàm di chuyển lên/xuống 1 tầng
      * @param floorNow
      * @param direction
      */
     
-    void move(int floorNow,int direction);
+    void move(int floorNow);
     /*
         IPassenger hiểu như là giao diện của 1 hành khách, thực tế là 1 panel gì đó
     */
@@ -29,12 +29,12 @@ public interface IElevator extends IDoor {
      * @param passenger
      */
     
-    void addPassenger(IPassenger passenger);
+    boolean addPassenger(IPassenger passenger);
    
     /**
      *  Cho hành khách đi ra
      * @param passenger
      */
-    void removePassenger(IPassenger passenger);
+    void removePassenger();
     
 }

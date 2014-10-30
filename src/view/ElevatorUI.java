@@ -53,15 +53,7 @@ public class ElevatorUI extends JPanel implements Runnable,IElevator {
         }
     }
 
-    @Override
-    public void addPassenger(IPassenger passenger) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void removePassenger(IPassenger passenger) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public void open() {
@@ -72,5 +64,24 @@ public class ElevatorUI extends JPanel implements Runnable,IElevator {
     public void close() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void move(int floorNow) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean addPassenger(IPassenger passenger) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+  
+
+    @Override
+    public void removePassenger() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+ 
 
 }
